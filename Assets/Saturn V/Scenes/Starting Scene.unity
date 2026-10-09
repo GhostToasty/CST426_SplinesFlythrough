@@ -3073,7 +3073,7 @@ MonoBehaviour:
   path: {fileID: 886995621}
   rocketLaunch: {fileID: 2038268307}
   target: {fileID: 2038268304}
-  speed: 100
+  speed: 75
   travelByDistance: 1
   faceTarget: 1
   rocket: 1
@@ -14054,6 +14054,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3497a947922eb8448ec5b2744d8062c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Splines::RocketLaunch
+  speed: 8
 --- !u!1 &2132287835
 GameObject:
   m_ObjectHideFlags: 0

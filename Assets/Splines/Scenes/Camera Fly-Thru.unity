@@ -8291,10 +8291,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Curves::SplineCamera
   path: {fileID: 2121145906}
+  rocketLaunch: {fileID: 0}
   target: {fileID: 1071888793}
   speed: 2.5
   travelByDistance: 1
   faceTarget: 1
+  rocket: 0
 --- !u!20 &1616656504
 Camera:
   m_ObjectHideFlags: 0
