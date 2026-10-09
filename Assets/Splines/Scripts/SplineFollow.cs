@@ -57,7 +57,7 @@ public class SplineFollow : MonoBehaviour
             transform.LookAt(target);
         else
         {
-            // transform.LookAt(path.SampleTangent(_u), UnityEngine.Vector3.up);
+            transform.LookAt(path.SampleTangent(_u), UnityEngine.Vector3.up);
             UnityEngine.Quaternion rotation = UnityEngine.Quaternion.LookRotation(path.SamplePoint(_u), UnityEngine.Vector3.up);
         }
 
