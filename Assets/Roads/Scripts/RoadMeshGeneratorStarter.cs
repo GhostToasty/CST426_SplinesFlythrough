@@ -39,8 +39,10 @@ public class RoadMeshGeneratorStarter : MonoBehaviour
     {
         List<Vector3> verts = new();
         List<Vector3> lowerVerts = new();
+        List<Vector3> capVerts = new();
         List<Vector2> uvs = new();
         List<Vector2> lowerUvs = new();
+        List<Vector2> capUvs = new();
         Array.Resize(ref bankAngles, splinePath.SegmentCount + 1);
 
         for (int i = 0; i < rungs; i++)
@@ -85,19 +87,38 @@ public class RoadMeshGeneratorStarter : MonoBehaviour
             lowerUvs.Add(new Vector2 (0f, distance / textureRepeatLength));
             lowerUvs.Add(new Vector2 (1f, distance / textureRepeatLength));
 
+            //creating cap
+            if (i == 0 || i == rungs - 1)
+            {
+                capVerts.Add(leftVert);
+                capVerts.Add(rightVert);
+                capVerts.Add(lowerLeftVert);
+                capVerts.Add(lowerRightVert);
+
+                capUvs.Add(new Vector2 (0f, 0f));
+                capUvs.Add(new Vector2 ((width * 0.67f) / textureRepeatLength, 0f));
+                capUvs.Add(new Vector2 (0f, depth / textureRepeatLength));
+                capUvs.Add(new Vector2 ((width * 0.67f) / textureRepeatLength, depth / textureRepeatLength));
+            }
         }
 
+
+
         //combines regular and lower verts and uvs into one array, respectively 
-        List<Vector3> combinedVerts = verts.Concat(lowerVerts).ToList();
-        List<Vector2> combinedUvs = uvs.Concat(lowerUvs).ToList();
+        List<Vector3> combinedVerts = verts.Concat(lowerVerts).Concat(capVerts).ToList();
+        List<Vector2> combinedUvs = uvs.Concat(lowerUvs).Concat(capUvs).ToList();
         
 
         //calculate triangles
         List<int> triangles = new();
-        for(int i = 0; i < rungs - 1; i++)
-        {
-            int lowerOffset = verts.Count;
+        List<int> capTriangles = new();
 
+        int lowerOffset = verts.Count;
+        int capOffset = verts.Count + lowerVerts.Count;
+        int j = 0;
+
+        for(int i = 0; i < rungs - 1; i++)
+        {            
             int bottomLeft = i * 2;
             int bottomRight = bottomLeft + 1;
             int topLeft = (i + 1) * 2;
@@ -107,6 +128,11 @@ public class RoadMeshGeneratorStarter : MonoBehaviour
             int lowerBottomRight = lowerOffset + bottomRight;
             int lowerTopLeft = lowerOffset + topLeft;
             int lowerTopRight = lowerOffset + topRight;
+
+            int capBottomLeft = j * 2;
+            int capBottomRight = capBottomLeft + 1;
+            int capTopLeft = (j + 1) * 2;
+            int capTopRight = capTopLeft + 1;
 
             //top road
             triangles.Add(bottomLeft);
@@ -144,36 +170,41 @@ public class RoadMeshGeneratorStarter : MonoBehaviour
             triangles.Add(lowerBottomRight);
             triangles.Add(lowerTopRight);
 
-            //first end
+            //first cap
             if (i == 0)
             {
-                triangles.Add(lowerBottomLeft);
-                triangles.Add(bottomLeft);
-                triangles.Add(lowerBottomRight);
+                capTriangles.Add(capOffset + capTopLeft);
+                capTriangles.Add(capOffset + capBottomLeft);
+                capTriangles.Add(capOffset + capTopRight);
 
-                triangles.Add(bottomLeft);
-                triangles.Add(bottomRight);
-                triangles.Add(lowerBottomRight);
+                capTriangles.Add(capOffset + capBottomLeft);
+                capTriangles.Add(capOffset + capBottomRight);
+                capTriangles.Add(capOffset + capTopRight);
+
+                j = 2;
             }
 
             //second end
             if (i == rungs - 2)
-            {
-                triangles.Add(lowerTopRight);
-                triangles.Add(topRight);
-                triangles.Add(lowerTopLeft);
+            {                 
+                capTriangles.Add(capOffset + capBottomLeft);
+                capTriangles.Add(capOffset + capTopLeft);
+                capTriangles.Add(capOffset + capBottomRight);
 
-                triangles.Add(topRight);
-                triangles.Add(topLeft);
-                triangles.Add(lowerTopLeft);
+                capTriangles.Add(capOffset + capTopLeft);
+                capTriangles.Add(capOffset + capTopRight);
+                capTriangles.Add(capOffset + capBottomRight);
             }
             
         }
+        
+        List<int>combinedTriangles = triangles.Concat(capTriangles).ToList();
+
 
         //convert triangles into mesh
         Mesh mesh = new();
         mesh.vertices = combinedVerts.ToArray();
-        mesh.triangles = triangles.ToArray();
+        mesh.triangles = combinedTriangles.ToArray();
         mesh.uv = combinedUvs.ToArray();
 
         mesh.RecalculateNormals();
